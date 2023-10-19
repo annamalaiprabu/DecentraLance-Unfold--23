@@ -10,8 +10,8 @@ const ProjectCard = ({
   domains,
 }) => {
   return (
-    <div className="bg-black max-w-sm rounded-lg hover:shadow-lg transition-all ease-in-out">
-      <div className="border-2 cursor-pointer max-w-sm  bg-secondary rounded-lg text-white p-4">
+    <div className=" max-w-sm  hover:shadow-lg transition-all ease-in-out rounded-xl ">
+      <div className="border border-secondary  cursor-pointer max-w-sm bg-tertiary shadow-xl  rounded-xl text-white p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <AiOutlineClockCircle className="w-6 h-6" />
