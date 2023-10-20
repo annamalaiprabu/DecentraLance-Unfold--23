@@ -12,6 +12,8 @@ const UrlField = ({
   setUrlError,
   placeholder,
 }) => {
+  const [isFirstTime, setIsFirstTime] = useState(true);
+
   const isValidUrl = (url) => {
     const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
     return urlPattern.test(url);
@@ -19,14 +21,22 @@ const UrlField = ({
 
   const handleInput = (e) => {
     setUrl(e.target.value);
-    isValidUrl(e.target.value) === false && e.target.value !== ''
-      ? setUrlError(true)
-      : setUrlError(false);
+
+    // Only check for URL validity after the first focus
+    if (!isFirstTime) {
+      isValidUrl(e.target.value) === false
+        ? setUrlError(true)
+        : setUrlError(false);
+    }
   };
 
   const checkisValid = () => {
-    if (isValidUrl(Url) === false && Url !== '') {
-      setUrlError(true);
+    if (isFirstTime) {
+      setIsFirstTime(false);
+    } else {
+      if (isValidUrl(Url) === false) {
+        setUrlError(true);
+      }
     }
   };
 
@@ -45,16 +55,16 @@ const UrlField = ({
         placeholder={placeholder}
         onChange={handleInput}
         onBlur={checkisValid}
-        className={`w-full text-[0.9375rem] tracking-[-0.005em] bg-white h-11 rounded py-[0.1rem] px-[0.875rem] mb-[0.8125rem]  text-primary-text border border-[#d7d7d7] focus:shadow-field focus:border-black transition-field duration-[0.25s] ease-in-out-expo outline-none`}
+        className={`w-full text-[1rem] bg-white h-12 rounded py-[0.1rem] px-[0.875rem] mb-[0.8125rem]  text-primary-text border border-light-gray focus:outline-black`}
       />
-      {UrlError && (
-        <p className="text-[0.875rem] leading-[125%] font-normal text-text-red flex items-center mt-[0.15rem]  ">
+      {UrlError && Url.length > 0 && (
+        <p className="text-[0.75rem] leading-[125%] font-normal text-text-red flex items-center mt-[0.15rem]  ">
           <Image
             src={ErrorIcon}
             alt="Error Icon"
             width={16}
             height={16}
-            className="bg-text-red w-5 h-5 rounded"
+            className="bg-text-red w-5 h-5 rounded-full"
           />
           <span className="pl-[0.625rem]">
             {errorMessage ? errorMessage : 'Please enter a valid URL'}

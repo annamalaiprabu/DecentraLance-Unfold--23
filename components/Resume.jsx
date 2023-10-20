@@ -1,10 +1,16 @@
 import React from 'react';
 import DragDrop from '@/components/DragDrop';
 
-const Authorization = () => {
+const Authorization = ({ resumeUrl, setResumeUrl }) => {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    console.log(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setResumeUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -14,7 +20,7 @@ const Authorization = () => {
           Resume <span className="text-secondary-text font-normal">(opt.)</span>
         </p>
         <div className="mt-3 h-[7.1875rem]">
-          <DragDrop handleFileSelect={handleFileSelect} />
+          <DragDrop handleFileSelect={handleFileSelect} document={resumeUrl} />
         </div>
       </div>
     </div>

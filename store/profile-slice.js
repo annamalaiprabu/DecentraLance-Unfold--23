@@ -1,13 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialProfileState = {
-  socialLinks: [],
+  profileData: {},
 };
 
 const profileSlice = createSlice({
   name: 'profile',
   initialState: initialProfileState,
-  reducers: {},
+  reducers: {
+    setProfileData(state, action) {
+      state.profileData = action.payload;
+    },
+  },
 });
 
 export const profileActions = profileSlice.actions;

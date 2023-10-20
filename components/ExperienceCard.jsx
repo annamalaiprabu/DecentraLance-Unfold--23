@@ -1,44 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import MonthYear from './MonthYear';
-import Input from './Input';
+import React, { useState, useEffect } from 'react';
+import MonthYear from './MonthYear'; // Ensure path is correct
+import Input from './Input'; // Ensure path is correct
 
-const EducationCard = () => {
-  const [startPeriod, setStartPeriod] = useState('');
-  const [endPeriod, setEndPeriod] = useState('');
+const ExperienceCard = ({
+  experience,
+  updateCompanyName,
+  updateStartDate,
+  updateEndDate,
+}) => {
   const [currentlyWorking, setCurrentlyWorking] = useState(false);
-  const [collage, setCollage] = useState('');
-
   useEffect(() => {
     if (currentlyWorking) {
-      setEndPeriod('');
+      updateEndDate('', ''); // Clear the end date when currently working is checked
     }
   }, [currentlyWorking]);
 
   return (
     <div className="w-full flex flex-col gap-[13px]">
-      <div className="">
+      <div>
         <Input
           label="Company Name"
           placeholder="Eg : Google"
-          inputValue={collage}
-          setInputValue={setCollage}
+          inputValue={experience.companyName}
+          setInputValue={updateCompanyName}
         />
       </div>
 
-      <div className="flex gap-6 ">
+      <div className="flex gap-6">
         <div className="flex-1">
           <MonthYear
             label="Start year"
-            period={startPeriod}
-            setPeriod={setStartPeriod}
+            period={experience.startDate}
+            setPeriod={updateStartDate}
           />
         </div>
         <div className="flex-1">
           <div className={`${currentlyWorking && 'opacity-0'}`}>
             <MonthYear
               label="End year"
-              period={endPeriod}
-              setPeriod={setEndPeriod}
+              period={experience.endDate}
+              setPeriod={updateEndDate}
             />
           </div>
 
@@ -57,4 +58,4 @@ const EducationCard = () => {
   );
 };
 
-export default EducationCard;
+export default ExperienceCard;

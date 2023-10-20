@@ -1,31 +1,102 @@
 import Authorization from '@/components/Resume';
 import Education from '@/components/Experience';
 import Resume from '@/components/SocialLinks';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef } from 'react';
 import BackLogo from '@/assets/LeftGrayArrow.svg';
 import Image from 'next/image';
 import RightArrow from '@/assets/RightArrow.svg';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
-import { onboardingActions } from '@/store/onboarding-slice';
 import BlackTick from '@/assets/BlackTick.svg';
 import BlackDownArrow from '@/assets/BlackDownArrow.svg';
 import ProfileDetails from '@/components/ProfileDetails';
+import { profileActions } from '@/store/profile-slice';
+import { useRouter } from 'next/router';
 
 const Onboarding = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [avatarSrc, setAvatarSrc] = useState('');
 
   const targetRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
-  const { linkedInUrlError, linkedInUrl } = useSelector(
-    (state) => state.onboarding
-  );
+  useEffect(() => {
+    // This effect runs only once after the component has mounted.
+    setIsFirstRender(false);
+  }, []);
+
+  // Profile Details
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [userName, setUserName] = useState('');
+  const [userNameError, setUserNameError] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [aboutMe, setAboutMe] = useState('');
+
+  // Experience
+
+  const [experiences, setExperiences] = useState([
+    {
+      id: 0,
+      companyName: '',
+      startDate: '',
+      endDate: '',
+    },
+  ]);
+
+  const updateCompanyName = (index, value) => {
+    const newExperiences = [...experiences];
+    newExperiences[index].companyName = value;
+    setExperiences(newExperiences);
+  };
+
+  const updateStartDate = (index, value) => {
+    const newExperiences = [...experiences];
+    newExperiences[index].startDate = value;
+    setExperiences(newExperiences);
+  };
+
+  const updateEndDate = (index, value) => {
+    const newExperiences = [...experiences];
+    newExperiences[index].endDate = value;
+    setExperiences(newExperiences);
+  };
+
+  const addExperience = () => {
+    setExperiences([
+      ...experiences,
+      {
+        id: experiences.length,
+        companyName: '',
+        startDate: '',
+        endDate: '',
+      },
+    ]);
+  };
+
+  const removeExperience = (index) => {
+    const newExperience = [...experiences];
+    newExperience.splice(index, 1);
+    setExperiences(newExperience);
+  };
+
+  // Social Links
+  const [linkedInUrl, setLinkedInUrl] = useState('');
+  const [linkedInUrlError, setLinkedInUrlError] = useState(false);
+  const [githubUrl, setGithubUrl] = useState('');
+  const [githubUrlError, setGithubUrlError] = useState(false);
+  const [twitterUrl, setTwitterUrl] = useState('');
+  const [twitterUrlError, setTwitterUrlError] = useState(false);
+
+  const [resumeUrl, setResumeUrl] = useState('');
+
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -40,38 +111,22 @@ const Onboarding = () => {
     };
   }, []);
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    console.log(file);
-  };
-
-  const checkLinkedInUrl = () => {
-    dispatch(onboardingActions.checkLinkedInUrl());
-    linkedInUrlError && linkedInUrl !== ''
-      ? toast.error('LinkedIn URL is not saved')
-      : linkedInUrl !== '' && toast.success('LinkedIn URL is saved');
-  };
-
   const nextPanel = (e) => {
     e.preventDefault();
-
-    if (index === 2) {
-      checkLinkedInUrl();
-    }
 
     if (index < 3) {
       setIndex(index + 1);
       targetRef.current.scrollLeft += 740;
       setDirection(1);
     }
+
+    if (index == 3) {
+      handleCompleteProfile();
+    }
   };
 
   const prevPanel = (e) => {
     e.preventDefault();
-
-    if (index === 2) {
-      checkLinkedInUrl();
-    }
 
     if (index > 0) {
       setIndex(index - 1);
@@ -85,6 +140,60 @@ const Onboarding = () => {
       e.preventDefault();
     }
   };
+
+  const handleCompleteProfile = () => {
+    if (
+      userName &&
+      email &&
+      linkedInUrl &&
+      githubUrl &&
+      twitterUrl &&
+      resumeUrl &&
+      experiences.length > 0 &&
+      avatarUrl
+    ) {
+      setIsComplete(true);
+      toast.success('Profile created successfully');
+    } else {
+      setIsComplete(false);
+      toast.error('Please fill all the fields');
+    }
+  };
+
+  useEffect(() => {
+    if (isComplete && !isFirstRender) {
+      dispatch(
+        profileActions.setProfileData({
+          avatarUrl,
+          userName,
+          email,
+          phoneNumber,
+          aboutMe,
+          experiences,
+          linkedInUrl,
+          githubUrl,
+          twitterUrl,
+          resumeUrl,
+        })
+      );
+      console.log('profileData', {
+        avatarUrl,
+        userName,
+        email,
+        phoneNumber,
+        aboutMe,
+        experiences,
+        linkedInUrl,
+        githubUrl,
+        twitterUrl,
+        resumeUrl,
+      });
+
+      router.push('/freelancer/');
+    } else {
+      !isFirstRender && toast.error('Please fill all the fields');
+    }
+  }, [isComplete]);
 
   return (
     <div className="w-full  lg:pt-[2.75rem] lg:pb-[4rem] ">
@@ -184,10 +293,56 @@ const Onboarding = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}>
-              {index === 0 && <ProfileDetails />}
-              {index === 1 && <Education />}
-              {index === 2 && <Resume />}
-              {index === 3 && <Authorization />}
+              {index === 0 && (
+                <ProfileDetails
+                  avatarUrl={avatarUrl}
+                  setAvatarUrl={setAvatarUrl}
+                  userName={userName}
+                  setUserName={setUserName}
+                  userNameError={userNameError}
+                  setUserNameError={setUserNameError}
+                  emailError={emailError}
+                  setEmailError={setEmailError}
+                  email={email}
+                  setEmail={setEmail}
+                  aboutMe={aboutMe}
+                  setAboutMe={setAboutMe}
+                  phoneNumber={phoneNumber}
+                  setPhoneNumber={setPhoneNumber}
+                />
+              )}
+              {index === 1 && (
+                <Education
+                  experiences={experiences}
+                  updateCompanyName={updateCompanyName}
+                  updateStartDate={updateStartDate}
+                  updateEndDate={updateEndDate}
+                  addExperience={addExperience}
+                  removeExperience={removeExperience}
+                />
+              )}
+              {index === 2 && (
+                <Resume
+                  linkedInUrl={linkedInUrl}
+                  setLinkedInUrl={setLinkedInUrl}
+                  linkedInUrlError={linkedInUrlError}
+                  setLinkedInUrlError={setLinkedInUrlError}
+                  githubUrl={githubUrl}
+                  setGithubUrl={setGithubUrl}
+                  githubUrlError={githubUrlError}
+                  setGithubUrlError={setGithubUrlError}
+                  twitterUrl={twitterUrl}
+                  setTwitterUrl={setTwitterUrl}
+                  twitterUrlError={twitterUrlError}
+                  setTwitterUrlError={setTwitterUrlError}
+                />
+              )}
+              {index === 3 && (
+                <Authorization
+                  resumeUrl={resumeUrl}
+                  setResumeUrl={setResumeUrl}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
           <div className="hidden w-full mt-[2rem] lg:flex justify-center">
